@@ -15,7 +15,10 @@ import org.springframework.stereotype.Service;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class PlayersService {
@@ -28,22 +31,26 @@ public class PlayersService {
     @Value("classpath:data/players.csv")
     private Resource resourceFile;
 
-    public File getPlayers() {
-        List<Long> ids = new ArrayList<>();
+    public File getPlayers() throws IOException {
         File playersCSV;
+        List<Player> players = getPlayersList();
+        playersCSV = createPlayersCSV(players);
+        return playersCSV;
+    }
+
+    public List<Player> getPlayersList() {
         try (CSVReader csvReader = new CSVReader(new FileReader(resourceFile.getFile()))) {
+            List<Long> ids = new ArrayList<>();
             String[] values;
             String[] keys = csvReader.readNext();
             while ((values = csvReader.readNext()) != null) {
                 Long id = Long.parseLong(getMap(keys, values).get("id"));
                 ids.add(id);
             }
-            List<Player> players = getPlayersFromApi(ids);
-            playersCSV = createPlayersCSV(players);
+            return getPlayersFromApi(ids);
         } catch (IOException | CsvValidationException e) {
             throw new RuntimeException(e);
         }
-        return playersCSV;
     }
 
     private Map<String, String> getMap(String[] keys, String[] values) {
@@ -118,7 +125,7 @@ public class PlayersService {
         return file;
     }
 
-    public String generateApiUrl(List<Long> ids) {
+    private String generateApiUrl(List<Long> ids) {
         StringBuilder url = new StringBuilder(this.baseUrl + "?");
         for (Long id : ids) {
             url.append("player_ids[]=").append(id).append("&");

@@ -1,21 +1,38 @@
 package com.example.compieassignment.schedulingtasks;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.example.compieassignment.dto.Player;
+import com.example.compieassignment.repositories.PlayerRepository;
+import com.example.compieassignment.services.PlayersService;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.List;
 
 @Component
 public class ScheduledTasks {
-    private static final Logger log = LoggerFactory.getLogger(ScheduledTasks.class);
 
-    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
+    private final PlayersService playersService;
+    private final PlayerRepository playerRepository;
+
+    public ScheduledTasks(final PlayersService playersService, PlayerRepository playerRepository) {
+        this.playersService = playersService;
+        this.playerRepository = playerRepository;
+    }
 
     @Scheduled(fixedRate = 900000)
-    public void reportCurrentTime() {
-        log.info("The time is now {}", dateFormat.format(new Date()));
+    public void updatePlayers() {
+        boolean dirtyCache = false;
+        List<Player> players = this.playersService.getPlayersList();
+        for (Player player : players) {
+            Player cachedPlayer = playerRepository.findById(Integer.toString(player.getId())).orElse(null);
+            if (!player.equals(cachedPlayer)) {
+                playerRepository.save(player);
+                dirtyCache = true;
+            }
+        }
+
+        if (dirtyCache) {
+            // updated socket
+        }
     }
 }

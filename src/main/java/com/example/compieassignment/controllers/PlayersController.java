@@ -2,6 +2,8 @@ package com.example.compieassignment.controllers;
 
 import com.example.compieassignment.services.PlayersService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -22,5 +24,11 @@ public class PlayersController {
     public String player() throws IOException {
         File file  = playersService.getPlayers();
         return Files.readString(file.toPath());
+    }
+
+    @MessageMapping("/players")
+    @SendTo("/topic/messages")
+    public String send(String message) throws Exception {
+		return message;
     }
 }

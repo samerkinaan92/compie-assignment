@@ -1,6 +1,12 @@
 package com.example.compieassignment.dto;
 
-public class Player {
+import org.springframework.data.redis.core.RedisHash;
+
+import java.io.Serializable;
+import java.util.Objects;
+
+@RedisHash("Player")
+public class Player implements Serializable {
     private int id;
     private String first_name;
     private String last_name;
@@ -126,5 +132,17 @@ public class Player {
 
     public void setDraft_number(int draft_number) {
         this.draft_number = draft_number;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Player player)) return false;
+        return getId() == player.getId() && getDraft_year() == player.getDraft_year() && getDraft_round() == player.getDraft_round() && getDraft_number() == player.getDraft_number() && Objects.equals(getFirst_name(), player.getFirst_name()) && Objects.equals(getLast_name(), player.getLast_name()) && Objects.equals(getPosition(), player.getPosition()) && Objects.equals(getHeight(), player.getHeight()) && Objects.equals(getWeight(), player.getWeight()) && Objects.equals(getJersey_number(), player.getJersey_number()) && Objects.equals(getCollege(), player.getCollege()) && Objects.equals(getCountry(), player.getCountry());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId(), getFirst_name(), getLast_name(), getPosition(), getHeight(), getWeight(), getJersey_number(), getCollege(), getCountry(), getDraft_year(), getDraft_round(), getDraft_number());
     }
 }
